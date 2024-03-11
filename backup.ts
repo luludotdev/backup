@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-run --allow-read --allow-sys
+#!/usr/bin/env -S deno run --ext=ts --allow-run --allow-read --allow-sys
 
 import * as hex from "https://deno.land/std@0.219.0/encoding/hex.ts";
 import * as fs from "https://deno.land/std@0.219.0/fs/mod.ts";
