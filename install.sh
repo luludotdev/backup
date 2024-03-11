@@ -22,3 +22,7 @@ fi
 script_path="$install_dir/$script_name"
 wget -q -O $script_path https://raw.githubusercontent.com/luludotdev/backup/master/backup.ts
 chmod +x $script_path
+
+echo "backup script installed to $script_path"
+echo "make sure to install borg"
+echo "https://borgbackup.readthedocs.io/en/stable/installation.html"
