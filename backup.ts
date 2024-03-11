@@ -8,6 +8,10 @@ function borg(...args: string[]): Promise<Deno.CommandOutput> {
   return new Deno.Command("borg", { args }).output();
 }
 
+function print(encoded: Uint8Array): void {
+  console.log(new TextDecoder().decode(encoded));
+}
+
 const command = new Command()
   .name("backup")
   .option("-v --verbose", "Enable verbose logging")
@@ -45,9 +49,11 @@ const command = new Command()
       const resp = await borg("init", "-e=none", repo);
       if (!resp.success) {
         console.log("failed to init repo");
-        if (verbose) console.log(new TextDecoder().decode(resp.stderr));
+        if (verbose) print(resp.stderr);
         Deno.exit(1);
       }
+
+      if (verbose) print(resp.stderr);
     }
 
     const bytes = new Uint8Array(6);
@@ -63,11 +69,11 @@ const command = new Command()
 
     if (!resp.success) {
       console.log("failed to create backup");
-      if (verbose) console.log(new TextDecoder().decode(resp.stderr));
+      if (verbose) print(resp.stderr);
       Deno.exit(1);
     }
 
-    if (verbose) console.log(new TextDecoder().decode(resp.stderr));
+    if (verbose) print(resp.stderr);
 
     // TODO: Automatic rclone
   });
