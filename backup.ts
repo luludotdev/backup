@@ -114,6 +114,8 @@ const cli = new Command()
         Deno.exit(1);
       }
 
+      await Deno.mkdir(repo, { recursive: true });
+
       const resp = await borg("init", "-e=none", repo);
       if (!resp.success) {
         console.log("failed to init repo");
