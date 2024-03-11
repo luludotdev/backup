@@ -1,0 +1,26 @@
+name: Build
+on: push
+
+env:
+  DENO_VERSION: v1.x
+  DENO_DIR: /home/runner/.deno
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: ${{ env.DENO_VERSION }}
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          save-always: ${{ true }}
+          path: ${{ env.DENO_DIR }}
+          key: ${{ runner.os }}-${{ hashFiles('deno.lock') }}
+      - run: deno fmt --check
+      - run: deno lint
+      - run: deno check backup.ts
