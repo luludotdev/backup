@@ -2,6 +2,7 @@
 
 import * as hex from "https://deno.land/std@0.219.1/encoding/hex.ts";
 import * as fs from "https://deno.land/std@0.219.1/fs/mod.ts";
+import * as path from "https://deno.land/std@0.219.1/path/mod.ts";
 import {
   ArgumentValue,
   Command,
@@ -120,7 +121,7 @@ const cli = new Command()
         Deno.exit(1);
       }
 
-      if (verbose) print(resp.stderr);
+      if (verbose) console.log(`created repo at ${path.resolve(repo)}`);
     }
 
     const bytes = new Uint8Array(6);
@@ -140,7 +141,10 @@ const cli = new Command()
       Deno.exit(1);
     }
 
-    if (verbose) print(resp.stderr);
+    if (verbose) {
+      console.log("backup info");
+      print(resp.stderr);
+    }
 
     if (prune) {
       const resp = await borg(
@@ -158,7 +162,10 @@ const cli = new Command()
         Deno.exit(1);
       }
 
-      if (verbose) print(resp.stderr);
+      if (verbose) {
+        console.log("prune info");
+        print(resp.stderr);
+      }
 
       // TODO: Detect borg 1.2.x and compact
     }
