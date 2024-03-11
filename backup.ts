@@ -147,6 +147,7 @@ const cli = new Command()
         "prune",
         repo,
         "--stats",
+        `--prefix=${name}-`,
         "--keep-last=1",
         `--keep-within=${keep}`,
       );
