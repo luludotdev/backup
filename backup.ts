@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run --ext=ts --allow-run --allow-read --allow-sys
 
-import * as hex from "https://deno.land/std@0.219.0/encoding/hex.ts";
-import * as fs from "https://deno.land/std@0.219.0/fs/mod.ts";
+import * as hex from "https://deno.land/std@0.219.1/encoding/hex.ts";
+import * as fs from "https://deno.land/std@0.219.1/fs/mod.ts";
 import {
   ArgumentValue,
   Command,
