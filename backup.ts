@@ -4,15 +4,15 @@ import * as hex from "https://deno.land/std@0.219.0/encoding/hex.ts";
 import * as fs from "https://deno.land/std@0.219.0/fs/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 
-function borg(...args: string[]): Promise<Deno.CommandOutput> {
-  return new Deno.Command("borg", { args }).output();
+function command(name: string, ...args: string[]): Promise<Deno.CommandOutput> {
+  return new Deno.Command(name, { args }).output();
 }
 
 function print(encoded: Uint8Array): void {
   console.log(new TextDecoder().decode(encoded));
 }
 
-const command = new Command()
+const cli = new Command()
   .name("backup")
   .option("-v --verbose", "Enable verbose logging")
   .option(
@@ -23,8 +23,18 @@ const command = new Command()
     required: true,
   })
   .option("-R --repo <path:file>", "Path to borg repo", { required: true })
+  .option("--rclone-remote <remote:string>", "Rclone remote name")
+  .option("--rclone-root <root:string>", "Rclone remote root directory", {
+    default: ".",
+  })
+  .option("-S --sync", "Sync repo using rclone", {
+    depends: ["rclone-remote", "rclone-root"],
+  })
   .arguments("<...PATHS>")
-  .action(async ({ verbose, init, name, repo }, ...paths) => {
+  .action(async (args, ...paths) => {
+    const borg = (...args: string[]) => command("borg", ...args);
+    const rclone = (...args: string[]) => command("rclone", ...args);
+
     try {
       await borg("-V");
     } catch {
@@ -32,7 +42,26 @@ const command = new Command()
       console.log(
         "https://borgbackup.readthedocs.io/en/stable/installation.html",
       );
+
       Deno.exit(1);
+    }
+
+    const {
+      verbose,
+      init,
+      name,
+      repo,
+      sync,
+    } = args;
+
+    if (sync) {
+      try {
+        await rclone("-V");
+      } catch {
+        console.log("missing `rclone` binary");
+        console.log("https://rclone.org/install/");
+        Deno.exit(1);
+      }
     }
 
     const exists = await fs.exists(repo, {
@@ -75,9 +104,26 @@ const command = new Command()
 
     if (verbose) print(resp.stderr);
 
-    // TODO: Automatic rclone
+    // TODO: Automatic prune
+
+    if (sync) {
+      const { rcloneRoot, rcloneRemote } = args;
+      const resp = await rclone(
+        "sync",
+        repo,
+        `${rcloneRemote}:${rcloneRoot}/${name}`,
+      );
+
+      if (!resp.success) {
+        console.log("failed to sync");
+        if (verbose) print(resp.stderr);
+        Deno.exit(1);
+      }
+
+      if (verbose) console.log("synced successfully");
+    }
   });
 
 if (import.meta.main) {
-  await command.parse(Deno.args);
+  await cli.parse(Deno.args);
 }
