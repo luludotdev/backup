@@ -7,7 +7,7 @@ script_name="${BACKUP_SCRIPT_NAME:-backup}"
 if command -v deno >/dev/null; then
   echo "" > /dev/null
 else
-  curl -fsSL https://deno.land/install.sh | DENO_INSTALL="/usr/local" sh
+  curl -fsSL https://deno.land/install.sh | DENO_INSTALL=`dirname $install_dir` sh
 fi
 
 # script
