@@ -40,7 +40,8 @@ backup --name documents --repo ~/backup/documents --keep 7d ~/Documents
 
 ### Cron
 
-If running the script inside a cron job, make sure you add the `deno`, `borg`, and `rclone` binaries to cron daemon's PATH.
+If running the script inside a cron job, make sure you add the `deno`, `borg`,
+and `rclone` binaries to cron daemon's PATH.
 
 ```sh
 # add this line to your crontab before any backup jobs
