@@ -37,3 +37,12 @@ backup --help
 # backup the contents of ~/Documents to ~/backup/documents
 backup --name documents --repo ~/backup/documents --keep 7d ~/Documents
 ```
+
+### Cron
+
+If running the script inside a cron job, make sure you add the `deno`, `borg`, and `rclone` binaries to cron daemon's PATH.
+
+```sh
+# add this line to your crontab before any backup jobs
+PATH=$PATH:/usr/local/bin:/usr/bin
+```
