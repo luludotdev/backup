@@ -1,14 +1,14 @@
 #!/usr/bin/env -S deno run --ext=ts --allow-run --allow-read --allow-sys
 
-import * as hex from "https://deno.land/std@0.219.1/encoding/hex.ts";
-import * as fs from "https://deno.land/std@0.219.1/fs/mod.ts";
-import * as path from "https://deno.land/std@0.219.1/path/mod.ts";
+import * as hex from "jsr:@std/encoding@1.0.5/hex";
+import * as fs from "jsr:@std/fs@1.0.4";
+import * as path from "jsr:@std/path@1.0.6";
 import {
   ArgumentValue,
   Command,
   Type,
   ValidationError,
-} from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
+} from "jsr:@cliffy/command@1.0.0-rc.5";
 
 function command(name: string, ...args: string[]): Promise<Deno.CommandOutput> {
   return new Deno.Command(name, { args }).output();
