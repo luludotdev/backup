@@ -8,7 +8,7 @@ import {
   Command,
   Type,
   ValidationError,
-} from "jsr:@cliffy/command@1.0.0-rc.5";
+} from "jsr:@cliffy/command@1.0.0-rc.7";
 
 function command(name: string, ...args: string[]): Promise<Deno.CommandOutput> {
   return new Deno.Command(name, { args }).output();
