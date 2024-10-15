@@ -1,14 +1,15 @@
 #!/usr/bin/env -S deno run --ext=ts --allow-run --allow-read --allow-sys
 
-import * as hex from "jsr:@std/encoding@1.0.5/hex";
-import * as fs from "jsr:@std/fs@1.0.4";
-import * as path from "jsr:@std/path@1.0.6";
 import {
   ArgumentValue,
   Command,
   Type,
   ValidationError,
 } from "jsr:@cliffy/command@1.0.0-rc.7";
+import * as hex from "jsr:@std/encoding@1.0.5/hex";
+import * as fs from "jsr:@std/fs@1.0.4";
+import * as path from "jsr:@std/path@1.0.6";
+import * as semver from "jsr:@std/semver@1.0.3";
 
 function command(name: string, ...args: string[]): Promise<Deno.CommandOutput> {
   return new Deno.Command(name, { args }).output();
@@ -55,6 +56,7 @@ const cli = new Command()
     required: true,
   })
   .option("-R --repo <path:file>", "Path to borg repo", { required: true })
+  .option("--no-compact", "Disable automatic archive compacting")
   .option("--no-prune", "Disable automatic archive pruning")
   .option("-K --keep <value:keep>", "Timeframe to keep backups for (eg: 7d)", {
     required: true,
@@ -71,8 +73,19 @@ const cli = new Command()
     const borg = (...args: string[]) => command("borg", ...args);
     const rclone = (...args: string[]) => command("rclone", ...args);
 
+    let canCompact = false;
     try {
-      await borg("-V");
+      const resp = await borg("-V");
+      if (!resp.success) throw new Error();
+
+      const version = new TextDecoder().decode(resp.stdout).replace(
+        "borg ",
+        "",
+      );
+
+      const parsed = semver.parse(version);
+      const isOneDotFour = semver.greaterOrEqual(parsed, semver.parse("1.4.0"));
+      if (isOneDotFour) canCompact = true;
     } catch {
       console.log("missing `borg` binary");
       console.log(
@@ -88,6 +101,7 @@ const cli = new Command()
       init,
       name,
       repo,
+      compact,
       prune,
       keep,
       sync,
@@ -169,7 +183,18 @@ const cli = new Command()
         print(resp.stderr);
       }
 
-      // TODO: Detect borg 1.2.x and compact
+      if (compact && canCompact) {
+        const resp = await borg(
+          "compact",
+          "--cleanup-commits",
+          repo,
+        );
+
+        if (!resp.success) {
+          console.log("failed to compact backups");
+          if (verbose) print(resp.stderr);
+        }
+      }
     }
 
     if (sync) {
